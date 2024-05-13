@@ -79,18 +79,7 @@
         function viewdata($id){
             try{
                 $con = $this->opencon();
-                $query = $con->prepare("SELECT
-            users.user_id,
-            users.firstname,
-            users.lastname,
-            users.gender,
-            users.birthday,
-            users.user,
-            users.password,
-            address.street,
-            address.barangay,
-            address.city,
-            address.province
+                $query = $con->prepare("SELECT users.user_id,users.firstname,users.lastname,users.gender,users.birthday,users.user,users.password,address.street,address.barangay,address.city,address.province
             FROM
                 users
             INNER JOIN address ON 
@@ -116,5 +105,26 @@
 
         }
 
+        function updateUser($user_id, $firstname, $lastname, $birthday, $gender, $username, $password){
+            try {
+                $con = $this->opencon();
+                $query = $con->prepare("UPDATE users SET firstname=?,lastname=?,birthday=?,gender=?,user=?,password=? WHERE user_id=?");
+                return $query->execute([$firstname,$lastname,$birthday,$gender,$username,$password,$user_id]);
+            } catch(PDOException $e){
+                // $con->rollBack();
+                return false;
+            }                
+        }
+
+        function updateAddress($user_id,$street,$barangay,$city,$province){
+            try {
+                $con = $this->opencon();
+                $query = $con->prepare("UPDATE address SET street=?,barangay=?,city=?,province=? WHERE user_id=?");
+                return $query->execute([$street,$barangay,$city,$province,$user_id]);
+            } catch(PDOException $e){
+                // $con->rollBack();
+                return false;
+            } 
+        }
+
     }   
-?>

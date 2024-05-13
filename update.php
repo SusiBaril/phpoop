@@ -7,17 +7,42 @@
     if(empty($id)){
         header('location:index.php');
     } else {
+        $id = $_POST['id'];
         $row=$con->viewdata($id);
     }
     
-    if(isset($_POST['update'])){
-      $id = $_POST['id'];
-      if($con->update($id)){
+    if(isset($_POST['Update'])){
+      //Personal Information
+      $user_id = $_POST['id'];
+      $firstname = $_POST['firstname'];
+      $lastname = $_POST['lastname'];
+      $birthday = $_POST['birthday'];
+      $gender = $_POST['gender'];
+      $username = $_POST['user'];
+      $password = $_POST['password'];
+      $confirm = $_POST['c_pass'];
+
+      //Address Information
+      $street = $_POST['street'];
+      $barangay = $_POST['barangay'];
+      $city = $_POST['city'];
+      $province = $_POST['province'];
+
+    if($password == $confirm){
+      if($con->updateUser($user_id,$firstname, $lastname, $birthday, $gender, $username, $password)){
+      if($con->updateAddress($user_id,$street,$barangay,$city,$province)){
         header('location:index.php');
-      } else{
-        echo "Something went wrong";
+        exit();
+      } else {
+        $error = "Error Occurred while updating user address, PLease Try again.";
+        echo $error;
+      } 
+      } else {
+        $error = "Error Occurred while updating user information, Please Try again";
+        echo $error;
       }
     }
+  }
 
 ?>
 
@@ -120,8 +145,8 @@
     <div class="container">
     <div class="row justify-content-center gx-0">
         <div class="col-lg-3 col-md-4"> 
-            <input type="hidden" name="id" value="<?php echo $rows['user_id']; ?>">
-            <input type="submit" name="Update" class="btn btn-outline-primary btn-block mt-4" value="Update">
+            <input type="hidden" name="id" value="<?php echo  $row['user_id']; ?>">
+            <input type="submit" name="Update" class="btn btn-outline-primary btn-block mt-4" value="<?php echo  $row['user_id'];?>">
         </div>
         <div class="col-lg-3 col-md-4"> 
             <a class="btn btn-outline-danger btn-block mt-4" href="index.php">Go Back</a>
