@@ -3,11 +3,11 @@
 require_once('classes/database.php');
 
 $con = new database();
-session_start();
+// session_start();
 
-if (empty($_SESSION['user'])) {
-  header('location:login.php');
-}
+// if (empty($_SESSION['user'])) {
+//   header('location:login.php');
+// }
 
 if (isset($_POST['Multisave'])) {
     $firstname = $_POST['firstname'];
@@ -70,7 +70,7 @@ if (isset($_POST['Multisave'])) {
 </head>
 <body>
 
-<?php include('includes/navbar.php');?>
+<!-- <?php include('includes/navbar.php');?> -->
 
 <div class="container custom-container rounded-3 shadow my-5 p-3 px-5">
   <h3 class="text-center mt-4"> Registration Form</h3>

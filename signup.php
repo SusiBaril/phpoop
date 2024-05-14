@@ -15,7 +15,7 @@ if (isset($_POST['Signup'])) {
 
   if($password == $confirm) {
     if($con->signup($firstname, $lastname, $birthday, $gender, $username, $password)) {
-        header('location:login.php');
+        header('location:multisave.php');
   } else {
     $error_message = 'Username already exist. Please choose a diffrent username.';
   }
