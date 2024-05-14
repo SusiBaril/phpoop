@@ -2,9 +2,11 @@
 
     require_once('classes/database.php');
     $con = new database();
+    session_start();
 
     $id=$_POST['id'];
     if(empty($id)){
+        $_SESSION['user'] = $result['user'];
         header('location:index.php');
     } else {
         $id = $_POST['id'];
@@ -146,7 +148,7 @@
     <div class="row justify-content-center gx-0">
         <div class="col-lg-3 col-md-4"> 
             <input type="hidden" name="id" value="<?php echo  $row['user_id']; ?>">
-            <input type="submit" name="Update" class="btn btn-outline-primary btn-block mt-4" value="<?php echo  $row['user_id'];?>">
+            <input type="submit" name="Update" class="btn btn-outline-primary btn-block mt-4" value="Update">
         </div>
         <div class="col-lg-3 col-md-4"> 
             <a class="btn btn-outline-danger btn-block mt-4" href="index.php">Go Back</a>
