@@ -1,11 +1,11 @@
 <?php
-require_once('classes/database.php');
-$con = new database();
-session_start();
+  require_once('classes/database.php');
+  $con = new database();
+  session_start();
 
-if (empty($_SESSION['user'])) {
-  header('location:login.php');
-}
+  if (empty($_SESSION['user'])) {
+    header('location:login.php');
+  }
  
   if(isset($_POST['delete'])){
     $id = $_POST['id'];
