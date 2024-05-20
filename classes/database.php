@@ -3,11 +3,24 @@
         function opencon() {
             return new PDO('mysql:host=localhost;dbname=php_221','root','');
         }
-        function check($username, $password){
+        function check($username, $password) {
+            // Open database connection
             $con = $this->opencon();
-            // Corrected SQL query string
-            $query = "SELECT * FROM users WHERE user='".$username."' AND password='".$password."'";
-            return $con->query($query)->fetch();
+        
+            // Prepare the SQL query
+            $stmt = $con->prepare("SELECT * FROM users WHERE user = ?");
+            $stmt->execute([$username]);
+        
+            // Fetch the user data as an associative array
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+            // If a user is found, verify the password
+            if ($user && password_verify($password, $user['password'])) {
+                return $user;
+            }
+        
+            // If no user is found or password is incorrect, return false
+            return false;
         }
 
         function signup($firstname, $lastname, $birthday, $gender, $username, $password){
@@ -23,21 +36,29 @@
             return $con->prepare("INSERT INTO users (firstname, lastname, birthday, gender, user,password) VALUE(?,?,?,?,?,?)")->execute([$firstname, $lastname, $birthday, $gender, $username, $password]);
         }
 
-        function signupUser($firstname, $lastname, $birthday, $gender, $username, $password){
+        // function signupUser($firstname, $lastname, $birthday, $gender, $username, $password){
+        //     $con = $this->opencon();
+
+        //     $query = $con->prepare("SELECT user FROM users WHERE user = ?");
+        //     $query->execute([$username]);
+        //     $existingUser = $query->fetch();
+
+        //     if($existingUser){
+        //         return false;   
+        //     }
+
+        //     $con->prepare("INSERT INTO users (firstname, lastname, birthday, gender, user,password) VALUE(?,?,?,?,?,?)")->execute([$firstname, $lastname, $birthday, $gender, $username, $password]);
+
+        //     return $con->lastInsertId();
+        // }
+
+        function signupUser($firstname, $lastname, $birthday, $sex, $email, $username, $password, $profilePicture)
+        {
             $con = $this->opencon();
-
-            $query = $con->prepare("SELECT user FROM users WHERE user = ?");
-            $query->execute([$username]);
-            $existingUser = $query->fetch();
-
-            if($existingUser){
-                return false;   
-            }
-
-            $con->prepare("INSERT INTO users (firstname, lastname, birthday, gender, user,password) VALUE(?,?,?,?,?,?)")->execute([$firstname, $lastname, $birthday, $gender, $username, $password]);
-
+            // Save user data along with profile picture path to the database
+            $con->prepare("INSERT INTO users (firstname, lastname, birthday, gender, email, user, password, user_profile_picture) VALUES (?,?,?,?,?,?,?,?)")->execute([$firstname, $lastname, $birthday, $sex, $email, $username, $password, $profilePicture]);
             return $con->lastInsertId();
-        }
+            }   
 
         function insertAddress($user_id,$street,$barangay,$city,$province){
             $con = $this->opencon();
@@ -48,6 +69,7 @@
         function view() {
             $con = $this->opencon();
             return $con->query("SELECT
+            users.user_profile_picture,
             users.user_id,
             users.firstname,
             users.lastname,
@@ -79,7 +101,7 @@
         function viewdata($id){
             try{
                 $con = $this->opencon();
-                $query = $con->prepare("SELECT users.user_id,users.firstname,users.lastname,users.gender,users.birthday,users.user,users.password,address.street,address.barangay,address.city,address.province
+                $query = $con->prepare("SELECT users.user_id,user_profile_picture,users.firstname,users.lastname,users.gender,users.birthday,users.user,users.password,address.street,address.barangay,address.city,address.province
             FROM
                 users
             INNER JOIN address ON 
