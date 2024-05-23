@@ -2,21 +2,19 @@
   require_once('classes/database.php');
   $con = new database();
   session_start();
-
+  
   if (empty($_SESSION['user'])) {
-    header('location:login.php');
+      header('location:login.php');
   }
- 
-  if(isset($_POST['delete'])){
-    $id = $_POST['id'];
-    if($con->delete($id)){
-      $_SESSION['user'] = $result['user'];
-      header('location:index.php');
-    } else{
-      echo "Something went wrong";
-    }
+  
+  if (isset($_POST['delete'])) {
+      $id = $_POST['id'];
+      if ($con->delete($id)) {
+          header('location:index.php');
+      }else{
+          echo "Something went wrong.";
+      }
   }
-
  
 ?>
 
@@ -26,6 +24,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Welcome!</title>
+  <link rel="stylesheet" href="style1.css">
   <link rel="stylesheet" href="./bootstrap-5.3.3-dist/css/bootstrap.css">
   <!-- Bootstrap CSS -->
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
@@ -79,15 +78,18 @@
           <td><?php echo ucwords($rows['address']);?></td>
           <td>
         <!--Edit Button-->
-          <form method="POST" action="update.php" style="display: inline;">
-            <input type="hidden" name="id" value="<?php echo $rows['user_id']; ?>">
-            <button type="submit" class="btn btn-primary btn-sm">Edit</button>
-          </form>
-        <!-- Delete button -->
-        <form method="POST" style="display: inline;">
-            <input type="hidden" name="id" value="<?php echo $rows['user_id']; ?>">
-            <input type="submit" class="btn btn-danger btn-sm" name="delete" value='Delete' onclick="return confirm('Are you sure you want to delete this user?')">
-        </form>
+            <form action="update.php" method="post" class="d-inline">
+              <input type="hidden" name="id" value="<?php echo $rows['user_id']; ?>">
+                <button type="submit" class="btn btn-warning btn-sm">
+                  <i class="fas fa-edit"></i>
+                </button>
+            </form>
+            <form method="POST" class="d-inline">
+              <input type="hidden" name="id" value="<?php echo $rows['user_id']; ?>">
+                <button type="submit" name="delete" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this user?')">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+            </form>
           </td>
         </tr>
 
@@ -99,6 +101,42 @@
       </tbody>
     </table>
   </div>
+  
+  <div class="container my-5">xa
+        <h2 class="text-center">User Profiles</h2>
+        <div class="card-container">
+            <?php
+            $data = $con->view();
+            foreach ($data as $rows) {
+            ?>
+            <div class="card">
+                <div class="card-body text-center">
+                    <?php if (!empty($rows['user_profile_picture'])): ?>
+                        <img src="<?php echo htmlspecialchars($rows['user_profile_picture']); ?>" alt="Profile Picture" class="profile-img">
+                    <?php else: ?>
+                        <img src="path/to/default/profile/pic.jpg" alt="Default Profile Picture" class="profile-img">
+                    <?php endif; ?>
+                    <h5 class="card-title"><?php echo htmlspecialchars($rows['firstname']) . ' ' . htmlspecialchars($rows['lastname']); ?></h5>
+                    <p class="card-text"><strong>Birthday:</strong> <?php echo htmlspecialchars($rows['birthday']); ?></p>
+                    <p class="card-text"><strong>Sex:</strong> <?php echo htmlspecialchars($rows['gender']); ?></p>
+                    <p class="card-text"><strong>Username:</strong> <?php echo htmlspecialchars($rows['user']); ?></p>
+                    <p class="card-text"><strong>Address:</strong> <?php echo ucwords(htmlspecialchars($rows['address'])); ?></p>
+                    <form action="update.php" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="<?php echo htmlspecialchars($rows['user_id']); ?>">
+                        <button type="submit" class="btn btn-primary btn-sm">Edit</button>
+                    </form>
+                    <form method="POST" class="d-inline">
+                        <input type="hidden" name="id" value="<?php echo htmlspecialchars($rows['user_id']); ?>">
+                        <input type="submit" name="delete" class="btn btn-danger btn-sm" value="Delete" onclick="return confirm('Are you sure you want to delete this user?')">
+                    </form>
+                </div>
+            </div>
+            <?php
+            }
+            ?>
+        </div>
+    </div>
+
 </div>
 </div>
 
