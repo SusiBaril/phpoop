@@ -127,11 +127,11 @@
 
         }
 
-        function updateUser($user_id, $firstname, $lastname, $birthday, $gender, $username, $password){
+        function updateUser($user_id, $firstname, $lastname, $birthday, $gender, $username, $password, $profile){
             try {
                 $con = $this->opencon();
-                $query = $con->prepare("UPDATE users SET firstname=?,lastname=?,birthday=?,gender=?,user=?,password=? WHERE user_id=?");
-                return $query->execute([$firstname,$lastname,$birthday,$gender,$username,$password,$user_id]);
+                $query = $con->prepare("UPDATE users SET firstname=?,lastname=?,birthday=?,gender=?,user=?,password=?, user_profile_picture=? WHERE user_id=?");
+                return $query->execute([$firstname,$lastname,$birthday,$gender,$username,$password,$profile,$user_id]);
             } catch(PDOException $e){
                 // $con->rollBack();
                 return false;

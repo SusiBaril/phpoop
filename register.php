@@ -163,6 +163,7 @@ if (isset($_POST['multisave'])) {
         </div>
       </div>
       <button type="button" id="nextButton" class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
+      <a class="btn btn-outline-danger mt-3" href="index.php">Go Back</a>
     </div>
 <!-- Step 2 -->
     <div class="form-step" id="step-2">

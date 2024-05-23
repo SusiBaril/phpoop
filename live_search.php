@@ -13,8 +13,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             // Check if the connection is successful
             if ($connection) {
                 // SQL query with JOIN
-                $query = $connection->prepare("SELECT users.user_id, users.firstname, users.lastname, users.birthday, users.gender, users.user, users.user_profile_picture, CONCAT(address.city,', ', address.province) AS address FROM users INNER JOIN address ON users.user_id = address.user_id WHERE users.user LIKE ? OR users.user_id LIKE ?");
-                $query->execute(["%$searchterm%","%$searchterm%"]);
+                $query = $connection->prepare("SELECT users.user_id, users.firstname, users.lastname, users.birthday, users.gender, users.user, users.user_profile_picture, CONCAT(address.city,', ', address.province) AS address FROM users INNER JOIN address ON users.user_id = address.user_id WHERE users.user LIKE ? OR users.user_id LIKE ? OR users.firstname LIKE ?");
+                $query->execute(["%$searchterm%","%$searchterm%","%$searchterm%"]);
                 $users = $query->fetchAll(PDO::FETCH_ASSOC);
 
                 // Generate HTML for table rows
@@ -30,16 +30,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $html .= '<td>' . $user['user'] . '</td>';
                     $html .= '<td>' . $user['address'] . '</td>';
                     $html .= '<td>'; // Action column
-                    $html .= '<form action="update.php" method="post" style="display: inline;">';
+                    $html .= '<form action="update.php" method="post" class="d-inline">';
                     $html .= '<input type="hidden" name="id" value="' . $user['user_id'] . '">';
-                    $html .= '<button type="submit" class="btn btn-primary btn-sm">Edit</button>';
+                    $html .= '<button type="submit" class="btn btn-warning btn-sm">';
+                    $html .= '<i class="fas fa-edit"></i>';
+                    $html .= '</button>';
                     $html .= '</form>';
-                    $html .= '<form method="POST" style="display: inline;">';
+                    $html .= '<form method="POST" class="d-inline">';
                     $html .= '<input type="hidden" name="id" value="' . $user['user_id'] . '">';
-                    $html .= '<input type="submit" name="delete" class="btn btn-danger btn-sm" value="Delete" onclick="return confirm(\'Are you sure you want to delete this user?\')">';
+                    $html .= '<button type="submit" name="delete" class="btn btn-danger btn-sm" value="Delete" onclick="return confirm(\'Are you sure you want to delete this user?\')">';
+                    $html .= '<i class="fas fa-trash-alt"></i>';
+                    $html .= '</button>';
                     $html .= '</form>';
                     $html .= '</td>';
                     $html .= '</tr>';
+
                 }
                 echo $html;
             } else {

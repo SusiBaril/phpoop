@@ -16,6 +16,7 @@
     if(isset($_POST['Update'])){
       //Personal Information
       $user_id = $_POST['id'];
+      $profile = $_POST['profile_picture'];
       $firstname = $_POST['firstname'];
       $lastname = $_POST['lastname'];
       $birthday = $_POST['birthday'];
@@ -31,7 +32,7 @@
       $province = $_POST['province'];
 
     if($password == $confirm){
-      if($con->updateUser($user_id,$firstname, $lastname, $birthday, $gender, $username, $password)){
+      if($con->updateUser($user_id,$firstname, $lastname, $birthday, $gender, $username, $password, $profile)){
       if($con->updateAddress($user_id,$street,$barangay,$city,$province)){
         header('location:index.php');
         exit();
@@ -44,6 +45,65 @@
         echo $error;
       }
     }
+
+    // Handle file upload
+    $target_dir = "uploads/";
+    $original_file_name = basename($_FILES["profile_picture"]["name"]);
+    
+    // NEW CODE: Initialize $new_file_name with $original_file_name
+     $new_file_name = $original_file_name; 
+    
+    
+     $target_file = $target_dir . $original_file_name;
+     $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+     $uploadOk = 1;
+    
+    // Check if file already exists and rename if necessary
+    if (file_exists($target_file)) {
+        // Generate a unique file name by appending a timestamp
+        $new_file_name = pathinfo($original_file_name, PATHINFO_FILENAME) . '_' . time() . '.' . $imageFileType;
+        $target_file = $target_dir . $new_file_name;
+    } else {
+        // Update $target_file with the original file name
+        $target_file = $target_dir . $original_file_name;
+    }
+
+    $check = getimagesize($_FILES["profile_picture"]["tmp_name"]);
+    if ($check === false) {
+        echo "File is not an image.";
+        $uploadOk = 0;
+    }
+
+    // Check file size
+    if ($_FILES["profile_picture"]["size"] > 500000) {
+        echo "Sorry, your file is too large.";
+        $uploadOk = 0;
+    }
+
+    // Allow certain file formats
+    if ($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif") {
+        echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+        $uploadOk = 0;
+    }
+
+    // Check if $uploadOk is set to 0 by an error
+    if ($uploadOk == 0) {
+        echo "Sorry, your file was not uploaded.";
+    } else {
+        if (move_uploaded_file($_FILES["profile_picture"]["tmp_name"], $target_file)) {
+            echo "The file " . htmlspecialchars($new_file_name) . " has been uploaded.";
+
+            // Save the user data and the path to the profile picture in the database
+            $profile_picture_path = 'uploads/'.$new_file_name; // Save the new file name (without directory)
+
+            $userID = $con->updateUser($firstname, $lastname, $birthday, $sex, $email, $username, $password, $profile_picture_path);
+
+        } else {
+          // File upload failed, display error message
+          echo "Sorry, there was an error uploading your file.";
+      }
+    }
+
   }
 
 ?>
@@ -81,6 +141,10 @@
       <div class="card-header bg-info text-white">Personal Information</div>
       <div class="card-body">
         <div class="form-row">
+          <div class="form-group col-md-6 col-sm-12">
+            <label for="profile_picture">Profile Picture</label>
+            <input type="file" class="form-control" name="profile_picture" id="profilepicture" accept="image/*" required>
+          </div>
           <div class="form-group col-md-6 col-sm-12">
             <label for="firstName">First Name:</label>
             <input type="text" class="form-control" name="firstname" id="firstName" placeholder="Firstname" value="<?php echo $row['firstname']; ?>">

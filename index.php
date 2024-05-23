@@ -102,7 +102,7 @@
     </table>
   </div>
   
-  <div class="container my-5">xa
+  <div class="container my-5">
         <h2 class="text-center">User Profiles</h2>
         <div class="card-container">
             <?php
