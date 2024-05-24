@@ -148,6 +148,32 @@
                 return false;
             } 
         }
+
+        function updatePassword($userId, $hashedPassword) {
+            $con = $this->opencon();
+            $query = $con->prepare("UPDATE users SET password = ? WHERE user_id = ?");
+            return $query->execute([$hashedPassword, $userId]);
+        }
+
+        function validateCurrentPassword($userId, $currentPassword) {
+            // Open database connection
+            $con = $this->opencon();
+        
+            // Prepare the SQL query
+            $query = $con->prepare("SELECT password FROM users WHERE user_id = ?");
+            $query->execute([$userId]);
+        
+            // Fetch the user data as an associative array
+            $user = $query->fetch(PDO::FETCH_ASSOC);
+        
+            // If a user is found, verify the password
+            if ($user && password_verify($currentPassword, $user['password'])) {
+                return true;
+            }
+        
+            // If no user is found or password is incorrect, return false
+            return false;
+        }
         
 
     }   
