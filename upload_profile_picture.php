@@ -4,9 +4,9 @@ require_once('classes/database.php');
 $con = new database();
 $response = array('success' => false, 'error' => '', 'filepath' => '');
 
-if (isset($_FILES['user_profile_picture']) && $_FILES['user_profile_picture']['error'] == 0) {
+if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] == 0) {
     $target_dir = "uploads/";
-    $original_file_name = basename($_FILES["user_profile_picture"]["name"]);
+    $original_file_name = basename($_FILES["profile_picture"]["name"]);
     $new_file_name = $original_file_name;
     $target_file = $target_dir . $original_file_name;
     $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
@@ -21,7 +21,7 @@ if (isset($_FILES['user_profile_picture']) && $_FILES['user_profile_picture']['e
     }
 
     // Check file size
-    if ($_FILES["user_profile_picture"]["size"] > 5 * 1024 * 1024) {
+    if ($_FILES["profile_picture"]["size"] > 5 * 1024 * 1024) {
         $response['error'] = "File size exceeds 5MB.";
         echo json_encode($response);
         exit;
@@ -38,7 +38,7 @@ if (isset($_FILES['user_profile_picture']) && $_FILES['user_profile_picture']['e
     if ($uploadOk == 0) {
         $response['error'] = "Sorry, your file was not uploaded.";
     } else {
-        if (move_uploaded_file($_FILES["user_profile_picture"]["tmp_name"], $target_file)) {
+        if (move_uploaded_file($_FILES["profile_picture"]["tmp_name"], $target_file)) {
             $profile_picture_path = 'uploads/' . $new_file_name;
 
             // Update the user profile picture in the database
