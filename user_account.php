@@ -51,7 +51,7 @@ if (isset($_POST['updatepassword'])) {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   
   <!-- For Pop Up Notification -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+ <link rel="stylesheet" href="sweetalert/src/sweetalert.css">
 
   <style>
     .profile-header {
@@ -124,29 +124,32 @@ if (isset($_POST['updatepassword'])) {
 
 <!-- Change Profile Picture Modal -->
 <div class="modal fade" id="changeProfilePictureModal" tabindex="-1" role="dialog" aria-labelledby="changeProfilePictureModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <form action="change_profile_picture.php" method="post" enctype="multipart/form-data">
-        <div class="modal-header">
-          <h5 class="modal-title" id="changeProfilePictureModalLabel">Change Profile Picture</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <form id="uploadProfilePicForm" enctype="multipart/form-data">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadProfilePicModalLabel">Upload Profile Picture</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="file" class="form-control form-control-file" id="profilePictureInput" name="profile_picture" accept="image/*" required>
+                    <small id="fileSizeError" class="form-text text-danger" style="display:none;">File size exceeds 5MB</small>
+                </div>
+                <div class="form-group">
+                    <img id="imagePreview" src="#" alt="Image Preview" style="display:none; width: 100%; height: auto;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </form>
         </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="profilePicture">Choose a new profile picture</label>
-            <input type="file" class="form-control" id="profilePicture" name="profile_picture" required>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary">Save changes</button>
-        </div>
-      </form>
+      </div>
     </div>
-  </div>
-</div>
 
 <!-- Update Account Information Modal -->
 <div class="modal fade" id="updateAccountInfoModal" tabindex="-1" role="dialog" aria-labelledby="updateAccountInfoModalLabel" aria-hidden="true">
@@ -427,9 +430,102 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
   </script>
+
+  <!-- Change Profile Picture Logic Starts here --><script>
+    $(document).ready(function() {
+        $('#profilePictureInput').change(function() {
+            const file = this.files[0];
+            if (file) {
+                // Check file size
+                if (file.size > 5 * 1024 * 1024) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'File size exceeds 5MB.',
+                        icon: 'error'
+                    });
+                    $('#imagePreview').hide();
+                    $('#uploadProfilePicForm').data('valid', false);
+                    return;
+                } else {
+                    $('#fileSizeError').hide();
+                    $('#uploadProfilePicForm').data('valid', true);
+                }
+
+                // Preview the image
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#imagePreview').attr('src', e.target.result);
+                    $('#imagePreview').show();
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        $('#uploadProfilePicForm').submit(function(event) {
+            event.preventDefault();
+            if (!$(this).data('valid')) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'File size exceeds 5MB.',
+                    icon: 'error'
+                });
+                return;
+            }
+
+            const formData = new FormData(this);
+            $.ajax({
+                url: 'upload_profile_picture.php', // Change this to your PHP file
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    try {
+                        if (typeof response === 'string') {
+                            response = JSON.parse(response);
+                        }
+                        if (response.success) {
+                            $('#profilePicPreview').attr('src', response.filepath);
+                            $('#changeProfilePictureModal').modal('hide');
+                            Swal.fire({
+                                title: 'Success!',
+                                text: 'Profile picture updated successfully.',
+                                icon: 'success'
+                            }).then(() => {
+                                // Reload the page after displaying the success message
+                                window.location.href = window.location.href.split('?')[0];
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: response.error,
+                                icon: 'error'
+                            });
+                        }
+                    } catch (e) {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'An error occurred while processing the response.',
+                            icon: 'error'
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'An error occurred while uploading the file.',
+                        icon: 'error'
+                    });
+                }
+            });
+        });
+    });
+    </script><!-- Change Profile Picture Logic Ends here -->
 <!-- SweetAlert2 Script For Pop Up Notification -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
+<script src="sweetalert/src/sweetalert.js"></script>
+
+<!-- After the message is shown the whole website will be reloaded and the query parameters after the url will be removed so that the message only appear once. -->
+<!-- Pop Up Messages after a succesful transaction starts here --> <script>
 document.addEventListener('DOMContentLoaded', function() {
   const params = new URLSearchParams(window.location.search);
   const status = params.get('status');
@@ -442,9 +538,14 @@ document.addEventListener('DOMContentLoaded', function() {
         text = 'Password updated successfully.';
         icon = 'success';
         break;
+      case 'success1':
+        title = 'Success!';
+        text = 'Address was updated successfully.';
+        icon = 'success';
+        break;
       case 'error':
         title = 'Error!';
-        text = 'Failed to update password.';
+        text = 'Something went wrong.';
         icon = 'error';
         break;
       case 'nomatch':
@@ -460,10 +561,14 @@ document.addEventListener('DOMContentLoaded', function() {
       title: title,
       text: text,
       icon: icon
+    }).then(() => {
+      // Remove the status parameter from the URL
+      const newUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState(null, null, newUrl);
     });
   }
 });
-</script>
+</script> <!-- Pop Up Messages after a succesful transaction ends here -->
 
 <!-- For Address Selector Validation -->
 
